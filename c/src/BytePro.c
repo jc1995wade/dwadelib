@@ -26,14 +26,30 @@ uint32_t strhex2dec(char s[], int len)
     return temp;
 }
 
+/**
+ * 对32位的数，即4个字节，大端转换成小端
+ * @param  value [big]
+ * @return       [lit]
+ */
+uint32_t reversebytes_uint32t(uint32_t value)
+{
+    return (value & 0x000000FFU) << 24 | (value & 0x0000FF00U) << 8  | 
+           (value & 0x00FF0000U) >> 8  | (value & 0xFF000000U) >> 24; 
+}
+
+
 
 #if 1
 int main()
 {
     char s[10];
     gets(s);
-    uint32_t n=strhex2dec(s, strlen(s));
+    uint32_t n = strhex2dec(s, strlen(s));
+    uint32_t m = reversebytes_uint32t(n);
+    
     printf("%d\n",n);
+    printf("%x\n",n);
+    printf("%x\n", m);
     return 0;
 }
 #endif
