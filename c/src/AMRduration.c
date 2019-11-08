@@ -10,22 +10,22 @@
 
 int getDuration(unsigned char* fileContent, int len)
 {
-	uint64_t duration=0;//语音持续时长
+	uint64_t duration=0;
 	//音频帧在八种编码模式下的帧内容占用字节数
 	int AMR_FRAME_SIZE[] = { 13, 14, 16, 18, 20, 21, 27, 32, 6, 1, 1, 1, 1, 1, 1, 1, 1};
 	size_t pos=0;//pos用来指示位置
 	size_t length=len;
-	unsigned char toc;//toc每次代表帧头,通过运算可以知道属于哪种编码模式
+	unsigned char toc; //toc赋值帧头
 	
 	pos+=6;//跳过文件头的6个字节
 	while(pos<length)
 	{
-		toc=fileContent[pos];//toc赋值帧头
-		//printf("toc = %d\n", toc);
+		toc=fileContent[pos];
+		/* 每一个数据帧对应20ms，丢弃Q为0的坏帧 */
         if (toc & 0x04 != 0)
-		    duration+=20;//每一个数据帧对应20ms
+		    duration+=20;
                 
-		toc=(toc>>3) & 0x0f;//对照表格帧头的编码一目了然
+		toc=(toc>>3) & 0x0f;
 		if(toc>=16)
 			toc=15;
 		
@@ -39,7 +39,7 @@ int getDuration(unsigned char* fileContent, int len)
 int main(int argc, char* argv[])
 {
 	int mRecorderFd;
-	mRecorderFd = open(argv[1], O_RDONLY|O_CREAT, 0666);
+	mRecorderFd = open(argv[1], O_RDONLY);
 	if (mRecorderFd <= 0) {
 		printf("open path:%s error", argv[1]);
 		return -1;
