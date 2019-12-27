@@ -3,7 +3,10 @@
 import socket
 import thread
 import time
+import datetime
 
+
+# no use
 def ttest():
 	#def getIP(domain):
 	dest_ip = socket.getaddrinfo("card.gpslink.cn", 'http')
@@ -11,6 +14,14 @@ def ttest():
 	lengh = len(dest_ip)
 	print(lengh)
 	print(dest_ip[0][4][0])
+
+def get_logcal_time():
+	now_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+	print(now_time)
+	return now_time
+	#time1 = datetime.datetime.strptime(now_time,'%Y-%m-%d %H:%M:%S')
+	#print(time1)
+
 
 
 def data_receive_fun(threadName):
@@ -43,7 +54,7 @@ def main():
 	tcp_socket.connect(dest_addr)
 
 
-	send_data = "[2019-06-21 10:01:56,A,RH1,355889008722099,T1,13510915841,15900622429,123456,460029006600946,861842030011616,RHBD]"
+	send_data = "["+get_logcal_time()+",A,RH1,355889008722099,T1,13510915841,15900622429,123456,460029006600946,861842030011616,RHBD]"
 	print(send_data)
 	tcp_socket.send(send_data)    
 
