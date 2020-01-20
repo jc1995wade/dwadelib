@@ -1,0 +1,8 @@
+Module.symvers
+modules.order
+.tmp_versions/
+.*.ko.cmd
+*.o
+*.o.cmd
+*.mod.c
+sprd_fm.ko
