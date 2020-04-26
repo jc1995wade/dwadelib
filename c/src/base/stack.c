@@ -4,7 +4,7 @@
 
 list_msg_t head;
 
-list_msg_t *node_create(int data)
+list_msg_t *stack_create(int data)
 {
 	list_msg_t *msg;
 	msg = malloc(sizeof(list_msg_t));
@@ -12,31 +12,22 @@ list_msg_t *node_create(int data)
 	return msg;
 }
 
-void node_add(list_msg_t *head, list_msg_t *node)
+void stack_push(list_msg_t *head, list_msg_t *node)
 {
-	list_add_tail(node, head);
+	list_add_head(node, head);
 }
 
-list_msg_t *node_find(list_msg_t *head, int data)
+list_msg_t *stack_pop(list_msg_t *head)
 {
-	list_msg_t *tmp = head->next;
-	while (tmp != head) {
-		if (tmp->cmd == data) {
-			return tmp;
-		}
-		tmp = tmp->next;
-	}
-	return NULL;
-}
+	list_msg_t *tmp;
 
-void node_del(list_msg_t *head, int data)
-{
-	list_msg_t *msg;
-	msg = node_find(head, data);
-	if (msg) {
-		list_del(msg->prev, msg->next);
-		free(msg);
+	if (list_empty(head)) {
+		return NULL;
 	}
+	tmp = head->next;
+	list_del(head, head->next->next);
+
+	return tmp;
 }
 
 void destory_list(list_msg_t *head)
@@ -61,21 +52,22 @@ int main(void)
 	// init
 	list_head_init(&head);
 
-	
 	// add
 	for(i=0; i<20; i++) {
-		node_add(&head, node_create(i));
+		stack_push(&head, stack_create(i));
 	}
 
-	// swap
-	a = node_find(&head, 8);
-	b = node_find(&head, 9);
-	list_swap(a, b);
+	// out
+	for(i=0; i<10; i++) {
+		tmp = stack_pop(&head);
+		if (!tmp) break;
+		free(tmp);
+	}
 
-	// delete
-	node_del(&head, 19);
-	node_del(&head, 15);
-	node_del(&head, 10);
+	// add
+	for(i=0; i<10; i++) {
+		stack_push(&head, stack_create(i+100));
+	}
 
 	// print
 	tmp = head.next;
@@ -90,6 +82,5 @@ int main(void)
 	printf("empty=%d\n", list_empty(&head));
 	return 0;
 }
-
 
 
