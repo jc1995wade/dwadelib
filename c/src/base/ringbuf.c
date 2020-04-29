@@ -34,38 +34,59 @@ void ringbuf_free(ringbuf_t *rb)
 	free(rb);
 }
 
+unsigned int ringbuf_available(ringbuf_t *rb)
+{
+	return (rb->size - rb->in + rb->out);
+}
+
 unsigned int ringbuf_put(ringbuf_t *rb, unsigned char *buf, unsigned int len)
 {
-	unsigned int length;
+	unsigned int after_l;
+	unsigned int put_data_l;
 	pthread_mutex_lock(&rb->mutex);
 
-	len = min(len, rb->size - rb->in + rb->out); //buffer中空数据的长度
-	
-	length = min(len, rb->size - (rb->in & (rb->size -1)));
-	memcpy(rb->buffer + (rb->in & rb->size -1), buf, length);
-	memcpy(rb->buffer, buf + length, len - length);
+	// UTF-8
+	// 实际可写入的数据长度
+	put_data_l = min(len, rb->size - rb->in + rb->out); 
 
-	rb->in += len;
+	// in到缓冲区尾部长度
+	after_l = min(put_data_l, rb->size - (rb->in & (rb->size - 1)));
+
+	// 第一次写入数据直到缓冲区尾部
+	memcpy(rb->buffer + (rb->in & (rb->size - 1)), buf, after_l);
+
+	// 从缓冲区起始位置开始写入数据
+	memcpy(rb->buffer, buf + after_l, put_data_l - after_l);
+
+	rb->in += put_data_l;
 	pthread_mutex_unlock(&rb->mutex);
-	return len;
+	return put_data_l;
 }
 
 unsigned int ringbuf_get(ringbuf_t *rb, unsigned char *buf, unsigned int len)
 {
-	unsigned int length;
+	unsigned int after_l;  
+	unsigned int get_data_l;   
 	pthread_mutex_lock(&rb->mutex);
 
-	len = min(len, rb->in + rb->out);
+	// 实际可获取的数据长度
+	get_data_l = min(len, rb->in - rb->out); 
+
+	// out位置到缓冲区尾部长度
+	after_l = min(get_data_l, rb->size - (rb->out & (rb->size - 1)));
+
+	// 第一次获取数据直到缓冲区尾部
+	memcpy(buf, rb->buffer + (rb->out & (rb->size - 1)), after_l);
+
+	// 从缓冲区起始位置开始获取数据
+	memcpy(buf + after_l, rb->buffer, get_data_l - after_l);
 	
-	length = min(len, rb->size - (rb->out & (rb->size - 1)));
-	memcpy(buf, rb->buffer + (rb->out & (rb->size - 1)), length);
-	memcpy(buf + length, rb->buffer, len - length);
-	
-	rb->out += len;
-	if (rb->in == rb->out)
+	rb->out += get_data_l;
+	if (rb->in == rb->out) {
 		rb->in = rb->out = 0;
+	}
 	pthread_mutex_unlock(&rb->mutex);
-	return len;
+	return after_l;
 }
 
 

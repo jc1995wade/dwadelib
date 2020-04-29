@@ -10,10 +10,10 @@ ringbuf_t *ring_buf;
 static void* thread_write(void* _val)
 {
 	unsigned int len;
-	char *buffer = "abc";
+	char *buffer = "12345678";
 	while(1) {
-		sleep(1);
-		len = ringbuf_put(ring_buf, buffer, 3);
+		sleep(6);
+		len = ringbuf_put(ring_buf, buffer, 8);
 		printf("write [%u][%s], in[%u], out[%u]\n", len, buffer, ring_buf->in, ring_buf->out);
 	}
 
@@ -24,9 +24,8 @@ static void* thread_read(void* _val)
 {
 	unsigned int len;
 	unsigned char buffer[10];
-	sleep(3);
 	while(1) {
-		sleep(2);
+		sleep(1);
 		memset(&buffer, 0, sizeof(buffer));
 		len = ringbuf_get(ring_buf, buffer, 2);
 		printf("read [%u][%s],  in[%u], out[%u]\n", len, buffer, ring_buf->in, ring_buf->out);
