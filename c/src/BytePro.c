@@ -5,6 +5,7 @@
 #define uint32_t unsigned int
 
 /**
+ * 字符串转hex
  * @param  s   char
  * @param  len char length
  * @return     unsigned int 
